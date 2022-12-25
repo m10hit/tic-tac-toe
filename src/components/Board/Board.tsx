@@ -1,33 +1,86 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Square from '../Square/Square';
 
 const Board = () => {
   const [value, setValue] = useState<(string | null)[]>(Array(9).fill(null));
   const [isXTurn, setIsXTurn] = useState(true);
+  const [winner, setWinner] = useState<boolean | string>(false);
+  useEffect(() => {
+    winnerCheck();
+  });
+
+  const playerTurn = isXTurn ? 'X' : 'O';
+
+  const winnerCheck = () => {
+    const winnerLogic = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+
+    for (let winner of winnerLogic) {
+      const [a, b, c] = winner;
+      if (value[a] !== null && value[a] === value[b] && value[a] === value[c]) {
+        setWinner(value[c] as string);
+      }
+    }
+    return false;
+  };
 
   const handleClick = (squareNumber: number) => {
-    const turn = [...value];
-    if (!turn[squareNumber]) turn[squareNumber] = isXTurn ? 'X' : 'O';
-    setValue(turn);
-    setIsXTurn(!isXTurn);
+    if (!winner) {
+      const turn = [...value];
+      if (!turn[squareNumber]) turn[squareNumber] = playerTurn;
+      setValue(turn);
+      setIsXTurn(!isXTurn);
+    }
+  };
+
+  const restartGameHandler = () => {
+    setValue(Array(9).fill(null));
+    setWinner(false);
+    setIsXTurn(true);
+  };
+
+  const renderSquares = (index: number) => {
+    return (
+      <Square handleClick={() => handleClick(index)} symbol={value[index]} />
+    );
   };
 
   return (
-    <div className="m-5">
-      <div className="flex justify-center items-center">
-        <Square handleClick={() => handleClick(0)} symbol={value[0]} />
-        <Square handleClick={() => handleClick(1)} symbol={value[1]} />
-        <Square handleClick={() => handleClick(2)} symbol={value[2]} />
+    <div className="m-5 mt-10">
+      <div className="flex justify-center font-bold">
+        {winner ? `${winner} is the winner` : `Next Turn: ${playerTurn}`}
+        {
+          <button
+            onClick={restartGameHandler}
+            type="button"
+            className="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-1 text-center ml-4 mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800"
+          >
+            Play Again
+          </button>
+        }
       </div>
       <div className="flex justify-center items-center">
-        <Square handleClick={() => handleClick(3)} symbol={value[3]} />
-        <Square handleClick={() => handleClick(4)} symbol={value[4]} />
-        <Square handleClick={() => handleClick(5)} symbol={value[5]} />
+        {renderSquares(0)}
+        {renderSquares(1)}
+        {renderSquares(2)}
       </div>
       <div className="flex justify-center items-center">
-        <Square handleClick={() => handleClick(6)} symbol={value[6]} />
-        <Square handleClick={() => handleClick(7)} symbol={value[7]} />
-        <Square handleClick={() => handleClick(8)} symbol={value[8]} />
+        {renderSquares(3)}
+        {renderSquares(4)}
+        {renderSquares(5)}
+      </div>
+      <div className="flex justify-center items-center">
+        {renderSquares(6)}
+        {renderSquares(7)}
+        {renderSquares(8)}
       </div>
     </div>
   );
