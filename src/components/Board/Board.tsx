@@ -2,14 +2,34 @@ import React, { useEffect, useState } from 'react';
 import Square from '../Square/Square';
 
 const Board = () => {
-  const [value, setValue] = useState<(string | null)[]>(Array(9).fill(null));
+  const [value, setValue] = useState<string[]>(Array(9).fill(''));
   const [isXTurn, setIsXTurn] = useState(true);
-  const [winner, setWinner] = useState<boolean | string>(false);
+  const [result, setResult] = useState({ winner: 'none', state: 'none' });
   useEffect(() => {
     winnerCheck();
-  });
+    tieCheck();
+  }, [value]);
 
   const playerTurn = isXTurn ? 'X' : 'O';
+
+  console.log(value);
+  const tieCheck = () => {
+    let filled = true;
+    value.forEach(block => {
+      if (block === '') {
+        filled = false;
+      }
+    });
+    if (filled) {
+      const winnerAtLastStep = winnerCheck();
+      if (!winnerAtLastStep) {
+        setResult({
+          winner: 'No one',
+          state: 'Tie',
+        });
+      }
+    }
+  };
 
   const winnerCheck = () => {
     const winnerLogic = [
@@ -25,15 +45,16 @@ const Board = () => {
 
     for (let winner of winnerLogic) {
       const [a, b, c] = winner;
-      if (value[a] !== null && value[a] === value[b] && value[a] === value[c]) {
-        setWinner(value[c] as string);
+      if (value[a] !== '' && value[a] === value[b] && value[a] === value[c]) {
+        setResult({ winner: value[c], state: 'Won' });
+        return true;
       }
     }
     return false;
   };
 
   const handleClick = (squareNumber: number) => {
-    if (!winner) {
+    if (result.winner === 'none' && result.state === 'none') {
       const turn = [...value];
       if (!turn[squareNumber]) turn[squareNumber] = playerTurn;
       setValue(turn);
@@ -42,8 +63,8 @@ const Board = () => {
   };
 
   const restartGameHandler = () => {
-    setValue(Array(9).fill(null));
-    setWinner(false);
+    setValue(Array(9).fill(''));
+    setResult({ winner: 'none', state: 'none' });
     setIsXTurn(true);
   };
 
@@ -56,7 +77,11 @@ const Board = () => {
   return (
     <div className="m-5 mt-10">
       <div className="flex justify-center font-bold">
-        {winner ? `${winner} is the winner` : `Next Turn: ${playerTurn}`}
+        {result.state === 'Tie'
+          ? 'Match Tied'
+          : result.state === 'Won'
+          ? `${result.winner} is the winner`
+          : `Next Turn: ${playerTurn}`}
         {
           <button
             onClick={restartGameHandler}
