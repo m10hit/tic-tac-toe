@@ -12,3 +12,6 @@ Tic Tac Toe is a famous two player game where the players take turns in three-by
 * Player who places three of their marks horizontally, vertically, or diagonally is the winner.
 
 # Screenshots
+![](images/random.png)
+![](images/winner.png)
+![](images/tie.png)
